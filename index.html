@@ -3,1036 +3,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Informasi Database & Rekap Pelayanan PTSP MTs Pondok Tremas</title>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        emerald: {
-                            800: '#065f46',
-                            900: '#064e3b',
-                            950: '#022c22',
-                        },
-                        gold: {
-                            400: '#fbbf24',
-                            500: '#f59e0b',
-                            600: '#d97706',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <!-- Font Awesome Icons -->
+    <title>PTSP MTs Pondok Tremas Pacitan</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter & Amir (Arabic-style compatible font) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <!-- SheetJS for Exporting to Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- html2canvas for Download Card as JPEG -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- html2canvas & jspdf for Export Card -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- SheetJS for Export Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
+        :root {
+            --primary-green: #0a5c36;
+            --secondary-green: #0e7947;
+            --accent-gold: #d4af37;
+            --light-bg: #f4f7f5;
+        }
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--light-bg);
+            color: #333;
         }
-        .font-arabic {
-            font-family: 'Amiri', serif;
+        .navbar-custom {
+            background: linear-gradient(135deg, var(--primary-green), #053b21);
+            border-bottom: 4px solid var(--accent-gold);
         }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            background: #fff;
         }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+        .btn-green {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #10b981;
-            border-radius: 3px;
+        .btn-green:hover {
+            background-color: var(--secondary-green);
+            color: white;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #059669;
+        .badge-diproses { background-color: #ffeaa7; color: #d63031; border: 1px solid #fdcb6e; }
+        .badge-selesai { background-color: #2ed573; color: white; }
+        .stat-card {
+            border-left: 5px solid var(--primary-green);
         }
-        .card-bg-pattern {
-            background-color: #ffffff;
-            background-image: radial-gradient(#10b981 0.5px, transparent 0.5px), radial-gradient(#10b981 0.5px, #ffffff 0.5px);
-            background-size: 20px 20px;
-            background-position: 0 0,10px 10px;
-            background-opacity: 0.05;
+        /* Style Kartu Pelayanan untuk Download */
+        #kartuPelayananPrint {
+            width: 500px;
+            padding: 25px;
+            background: #fff;
+            border: 3px double var(--primary-green);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin: auto;
         }
+        .kop-surat {
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .kop-title-1 { font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0; }
+        .kop-title-2 { font-size: 18px; font-weight: 800; color: var(--primary-green); margin: 0; }
+        .kop-alamat { font-size: 11px; margin: 0; color: #555; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body>
 
-    <!-- HEADER / NAVBAR -->
-    <header class="bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-950 text-white shadow-lg sticky top-0 z-30 border-b-4 border-amber-400">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-white rounded-full p-1.5 flex items-center justify-center shadow-md border-2 border-amber-400">
-                        <!-- Logo Placeholder / Emblem Icon -->
-                        <i class="fa-solid fa-mosque text-emerald-800 text-2xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-lg sm:text-xl font-bold tracking-wide flex items-center gap-2">
-                            PTSP MTs PONDOK TREMAS
-                            <span class="text-xs bg-amber-400 text-emerald-950 font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Pacitan</span>
-                        </h1>
-                        <p class="text-xs text-emerald-200">Pelayanan Terpadu Satu Pintu Madrasah Tsanawiyah Pondok Tremas</p>
-                    </div>
+    <!-- Header Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="fa-solid me-3 fs-3 text-warning"></i>
+                <div>
+                    <h5 class="m-0 fw-bold">PTSP MTs PONDOK TREMAS</h5>
+                    <small class="text-white-50" style="font-size: 12px;">Pelayanan Terpadu Satu Pintu - Sync Google Sheets</small>
                 </div>
-                <div class="hidden md:flex items-center space-x-4">
-                    <div class="text-right">
-                        <p class="text-xs text-emerald-200">Waktu Real-time</p>
-                        <p id="liveClock" class="text-sm font-semibold tracking-wider font-mono text-amber-300"></p>
-                    </div>
+            </a>
+            <button class="btn btn-outline-light btn-sm" onclick="syncData()">
+                <i class="fa-solid fa-rotate me-1"></i> Refresh Data
+            </button>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+
+        <!-- Banner Pengaturan API Key Google Sheets -->
+        <div class="card card-custom p-3 mb-4 bg-light border-warning">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <strong class="text-dark"><i class="fa-solid fa-link text-warning me-2"></i>Koneksi Database Google Sheets:</strong>
+                    <div class="small text-muted" id="statusKoneksi">Status: Memeriksa koneksi...</div>
+                </div>
+                <div class="d-flex gap-2">
+                    <input type="text" id="scriptUrlInput" class="form-control form-control-sm" style="width: 300px;" placeholder="Tempel URL Google Apps Script di sini...">
+                    <button class="btn btn-warning btn-sm fw-bold" onclick="simpanUrlScript()">Hubungkan</button>
                 </div>
             </div>
         </div>
-    </header>
 
-    <!-- MAIN CONTAINER -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
-
-        <!-- RINGKASAN DASHBOARD (STATISTIK) -->
-        <section class="mb-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Card 1: Total Pelayanan -->
-                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Pelayanan</p>
-                            <h3 id="statTotal" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl">
-                            <i class="fa-solid fa-folder-open"></i>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-400 mt-2"><i class="fa-solid fa-circle-info mr-1"></i> Keseluruhan berkas masuk</p>
-                </div>
-
-                <!-- Card 2: Diproses -->
-                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Sedang Diproses</p>
-                            <h3 id="statDiproses" class="text-2xl font-bold text-amber-600 mt-1">0</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-400 mt-2"><i class="fa-solid fa-spinner fa-spin mr-1 text-amber-500"></i> Membutuhkan tindak lanjut</p>
-                </div>
-
-                <!-- Card 3: Selesai -->
-                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Selesai</p>
-                            <h3 id="statSelesai" class="text-2xl font-bold text-emerald-600 mt-1">0</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl">
-                            <i class="fa-solid fa-circle-check"></i>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-400 mt-2"><i class="fa-solid fa-check mr-1 text-emerald-500"></i> Pelayanan rampung</p>
-                </div>
-
-                <!-- Card 4: Hari Ini -->
-                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Masuk Hari Ini</p>
-                            <h3 id="statHariIni" class="text-2xl font-bold text-indigo-600 mt-1">0</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
-                            <i class="fa-solid fa-calendar-day"></i>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-400 mt-2"><i class="fa-solid fa-bolt mr-1 text-indigo-500"></i> Permohonan baru hari ini</p>
+        <!-- Dashboard Stat -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card card-custom stat-card p-3">
+                    <span class="text-muted small">TOTAL PELAYANAN</span>
+                    <h3 class="fw-bold my-1" id="statTotal">0</h3>
                 </div>
             </div>
-        </section>
-
-        <!-- ACTION BUTTONS & NAVIGATION ROW -->
-        <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mb-6">
-            <div class="flex items-center gap-2">
-                <button onclick="openFormModal()" class="flex-1 sm:flex-none bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm flex items-center justify-center gap-2 shadow-md transition-all transform active:scale-95">
-                    <i class="fa-solid fa-plus-circle"></i> Entry Data Pelayanan Baru
-                </button>
-                <button onclick="exportToExcel()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 px-4 py-2.5 rounded-lg font-medium text-sm flex items-center gap-2 shadow-sm transition">
-                    <i class="fa-solid fa-file-excel text-emerald-600"></i> Ekspor Excel
-                </button>
+            <div class="col-md-3">
+                <div class="card card-custom stat-card p-3 border-warning">
+                    <span class="text-muted small">SEDANG DIPROSES</span>
+                    <h3 class="fw-bold my-1 text-warning" id="statProses">0</h3>
+                </div>
             </div>
-            <div class="text-xs text-slate-500 flex items-center gap-1 self-end sm:self-center">
-                <i class="fa-solid fa-database text-slate-400"></i> Data tersimpan aman di Browser (LocalStorage)
+            <div class="col-md-3">
+                <div class="card card-custom stat-card p-3 border-success">
+                    <span class="text-muted small">SELESAI</span>
+                    <h3 class="fw-bold my-1 text-success" id="statSelesai">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-custom stat-card p-3 border-info">
+                    <span class="text-muted small">HARI INI</span>
+                    <h3 class="fw-bold my-1 text-info" id="statHariIni">0</h3>
+                </div>
             </div>
         </div>
 
-        <!-- REKAP TABLE & FILTER SECTION -->
-        <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <!-- Filter Bar -->
-            <div class="p-4 bg-slate-50/80 border-b border-slate-200 flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
-                
-                <!-- Search Box -->
-                <div class="relative flex-1 min-w-[240px]">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Cari No Pelayanan, Nama Pemohon, Telp..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition">
-                </div>
-
-                <!-- Dropdown Filters -->
-                <div class="flex flex-wrap sm:flex-nowrap gap-2 items-center">
-                    <!-- Filter Periode Waktu -->
-                    <div class="flex items-center space-x-1 min-w-[130px]">
-                        <label for="filterPeriode" class="text-xs font-semibold text-slate-600 hidden sm:block">Waktu:</label>
-                        <select id="filterPeriode" onchange="applyFilters()" class="w-full text-xs sm:text-sm border border-slate-300 rounded-lg px-2.5 py-2 bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-                            <option value="semua">Semua Waktu</option>
-                            <option value="minggu_ini">Minggu Ini</option>
-                            <option value="bulan_ini">Bulan Ini</option>
-                            <option value="tahun_ini">Tahun Ini</option>
-                        </select>
-                    </div>
-
-                    <!-- Filter Keperluan -->
-                    <div class="flex items-center space-x-1 min-w-[140px]">
-                        <select id="filterKeperluan" onchange="applyFilters()" class="w-full text-xs sm:text-sm border border-slate-300 rounded-lg px-2.5 py-2 bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-                            <option value="semua">Semua Keperluan</option>
-                            <option value="Surat-Menyurat">Surat-Menyurat</option>
-                            <option value="Permohonan Mutasi">Permohonan Mutasi</option>
-                            <option value="Permohonan SKTM">Permohonan SKTM</option>
-                            <option value="Ijazah">Ijazah</option>
-                            <option value="Raport">Raport</option>
-                            <option value="Lain-Lain">Lain-Lain</option>
-                        </select>
-                    </div>
-
-                    <!-- Filter Status -->
-                    <div class="flex items-center space-x-1 min-w-[120px]">
-                        <select id="filterStatus" onchange="applyFilters()" class="w-full text-xs sm:text-sm border border-slate-300 rounded-lg px-2.5 py-2 bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-                            <option value="semua">Semua Status</option>
-                            <option value="Diproses">Diproses</option>
-                            <option value="Selesai">Selesai</option>
-                        </select>
-                    </div>
-
-                    <!-- Reset Filter -->
-                    <button onclick="resetFilters()" title="Reset Filter" class="p-2 border border-slate-300 rounded-lg bg-white hover:bg-slate-100 text-slate-600 transition">
-                        <i class="fa-solid fa-rotate-right text-xs"></i>
+        <!-- Tab & Akses Fitur -->
+        <div class="card card-custom p-3 mb-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <button class="btn btn-green fw-semibold" data-bs-toggle="modal" data-bs-target="#modalForm" onclick="resetForm()">
+                    <i class="fa-solid fa-plus me-2"></i>Tambah Pelayanan Baru
+                </button>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="filterPeriode('minggu')">Minggu Ini</button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="filterPeriode('bulan')">Bulan Ini</button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="filterPeriode('tahun')">Tahun Ini</button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="filterPeriode('semua')">Semua</button>
+                    <button class="btn btn-success btn-sm ms-2" onclick="exportToExcel()">
+                        <i class="fa-solid fa-file-excel me-1"></i>Ekspor Excel
                     </button>
                 </div>
             </div>
+        </div>
 
-            <!-- Table Container -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs sm:text-sm">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-                            <th class="p-3.5 text-center w-12">No</th>
-                            <th class="p-3.5 whitespace-nowrap">No Pelayanan</th>
-                            <th class="p-3.5 whitespace-nowrap">Tanggal Input</th>
-                            <th class="p-3.5">Nama Pemohon</th>
-                            <th class="p-3.5 whitespace-nowrap">No. WhatsApp</th>
-                            <th class="p-3.5">Keperluan</th>
-                            <th class="p-3.5">Eksekutor</th>
-                            <th class="p-3.5 text-center">Status</th>
-                            <th class="p-3.5 whitespace-nowrap">Tgl Selesai</th>
-                            <th class="p-3.5 text-center w-28">Aksi</th>
+        <!-- Tabel Data -->
+        <div class="card card-custom p-3">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>No</th>
+                            <th>No Pelayanan</th>
+                            <th>Tanggal</th>
+                            <th>Nama Pemohon</th>
+                            <th>No Telp</th>
+                            <th>Keperluan</th>
+                            <th>Eksekutor</th>
+                            <th>Status</th>
+                            <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="dataTableBody" class="divide-y divide-slate-200">
-                        <!-- Rows rendered via JavaScript -->
+                    <tbody id="tabelData">
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-muted">Sedang memuat data dari Google Sheets...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
-
-            <!-- Empty State -->
-            <div id="emptyState" class="hidden text-center py-12 px-4">
-                <i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-3"></i>
-                <p class="text-slate-500 font-medium">Tidak ada data pelayanan ditemukan</p>
-                <p class="text-xs text-slate-400 mt-1">Coba sesuaikan kata kunci pencarian atau filter yang Anda pilih.</p>
-            </div>
-
-            <!-- Table Footer Stats -->
-            <div class="p-3.5 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-xs text-slate-500">
-                <span id="showingCount">Menampilkan 0 data</span>
-                <span>PTSP MTs Pondok Tremas Pacitan</span>
-            </div>
-        </section>
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="bg-emerald-950 text-emerald-300 text-xs py-4 mt-auto border-t border-emerald-800">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p>&copy; <span id="year"></span> PTSP MTs Pondok Tremas - Sistem Rekap Pelayanan Publik Pesantren Tremas Pacitan.</p>
         </div>
-    </footer>
 
-    <!-- MODAL 1: FORM ENTRY / EDIT DATA -->
-    <div id="formModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden transform transition-all my-8">
-            
-            <!-- Modal Header -->
-            <div class="bg-gradient-to-r from-emerald-800 to-emerald-900 px-6 py-4 text-white flex justify-between items-center border-b-2 border-amber-400">
-                <h3 id="modalTitle" class="font-bold text-lg flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-amber-400"></i> Entry Data Pelayanan PTSP
-                </h3>
-                <button onclick="closeFormModal()" class="text-white/80 hover:text-white text-lg transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <!-- Form -->
-            <form id="pelayananForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4">
-                <input type="hidden" id="editId" value="">
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- No Pelayanan -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">No. Pelayanan <span class="text-red-500">*</span></label>
-                        <input type="text" id="inputNoPelayanan" readonly class="w-full px-3 py-2 text-sm bg-slate-100 border border-slate-300 rounded-lg text-slate-600 font-mono font-semibold cursor-not-allowed outline-none">
-                    </div>
-
-                    <!-- Tanggal -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Permohonan <span class="text-red-500">*</span></label>
-                        <input type="date" id="inputTanggal" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
-                    </div>
-                </div>
-
-                <!-- Nama Pemohon -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Pemohon / Santri / Wali <span class="text-red-500">*</span></label>
-                    <input type="text" id="inputNama" required placeholder="Contoh: Ahmad Fauzi / Orang Tua Santri" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
-                </div>
-
-                <!-- Nomor Telepon -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor WhatsApp / Telepon <span class="text-red-500">*</span></label>
-                    <input type="tel" id="inputTelepon" required placeholder="Contoh: 081234567890" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Keperluan -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Keperluan <span class="text-red-500">*</span></label>
-                        <select id="inputKeperluan" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
-                            <option value="">-- Pilih Keperluan --</option>
-                            <option value="Surat-Menyurat">Surat-Menyurat</option>
-                            <option value="Permohonan Mutasi">Permohonan Mutasi</option>
-                            <option value="Permohonan SKTM">Permohonan SKTM</option>
-                            <option value="Ijazah">Ijazah</option>
-                            <option value="Raport">Raport</option>
-                            <option value="Lain-Lain">Lain-Lain</option>
-                        </select>
-                    </div>
-
-                    <!-- Eksekutor -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Eksekutor / Petugas <span class="text-red-500">*</span></label>
-                        <select id="inputEksekutor" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
-                            <option value="">-- Pilih Eksekutor --</option>
-                            <option value="Ust. Aris">Ust. Aris</option>
-                            <option value="Ust. Akim">Ust. Akim</option>
-                            <option value="Ust. Hamam">Ust. Hamam</option>
-                            <option value="Ust. Yafi'">Ust. Yafi'</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Status -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Status Pelayanan <span class="text-red-500">*</span></label>
-                        <select id="inputStatus" onchange="toggleTanggalSelesaiLogic()" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white font-medium">
-                            <option value="Diproses">Diproses</option>
-                            <option value="Selesai">Selesai</option>
-                        </select>
-                    </div>
-
-                    <!-- Tanggal Selesai -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Selesai</label>
-                        <input type="date" id="inputTanggalSelesai" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
-                    </div>
-                </div>
-
-                <!-- Keterangan -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Keterangan / Catatan Tambahan</label>
-                    <textarea id="inputKeterangan" rows="2" placeholder="Catatan permohonan atau detail berkas yang dibawa..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
-                </div>
-
-                <!-- Submit Buttons -->
-                <div class="flex justify-end space-x-3 pt-3 border-t border-slate-200">
-                    <button type="button" onclick="closeFormModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-medium shadow transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-floppy-disk"></i> Simpan Data
-                    </button>
-                </div>
-            </form>
-        </div>
     </div>
 
-
-    <!-- MODAL 2: PREVIEW KARTU PELAYANAN (CETAK & DOWNLOAD JPEG) -->
-    <div id="cardModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden my-6">
-            <div class="bg-slate-800 text-white px-5 py-3 flex justify-between items-center">
-                <h3 class="font-bold text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-id-card text-amber-400"></i> Kartu Tanda Pelayanan PTSP
-                </h3>
-                <button onclick="closeCardModal()" class="text-slate-300 hover:text-white transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <!-- CARD DESIGN TO RENDER -->
-            <div class="p-6 bg-slate-100 flex justify-center">
-                <div id="kartuPelayananPrint" class="w-full max-w-[500px] bg-white rounded-2xl shadow-xl border-2 border-emerald-700 overflow-hidden relative card-bg-pattern text-slate-800">
-                    
-                    <!-- Top Floral/Arabic Decorative Banner -->
-                    <div class="bg-gradient-to-r from-emerald-950 via-emerald-800 to-emerald-950 text-white p-4 relative border-b-4 border-amber-400">
-                        <div class="flex items-center justify-between">
-                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center p-1 border-2 border-amber-400 shadow">
-                                <i class="fa-solid fa-mosque text-emerald-800 text-2xl"></i>
-                            </div>
-                            <div class="text-center flex-1 px-2">
-                                <p class="text-[10px] font-arabic tracking-widest text-amber-300 mb-0.5">مدرسه ثانويه بمعهد ترمس</p>
-                                <h2 class="font-extrabold text-sm sm:text-base tracking-wide leading-tight text-white">MTs PONDOK TREMAS</h2>
-                                <p class="text-[10px] text-emerald-200">PELAYANAN TERPADU SATU PINTU (PTSP)</p>
-                            </div>
-                            <div class="text-right text-[9px] text-emerald-100 leading-tight">
-                                <span class="bg-amber-400 text-emerald-950 px-1.5 py-0.5 rounded font-bold">BUKTI RESMI</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card Body -->
-                    <div class="p-5 relative">
-                        <!-- Watermark Logo -->
-                        <div class="absolute inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none">
-                            <i class="fa-solid fa-mosque text-[180px] text-emerald-900"></i>
-                        </div>
-
-                        <!-- Card Header Info -->
-                        <div class="flex justify-between items-center border-b border-dashed border-slate-300 pb-3 mb-4">
-                            <div>
-                                <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">No. Pelayanan</span>
-                                <p id="cardNoPelayanan" class="font-mono font-bold text-emerald-900 text-base sm:text-lg"></p>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Tgl Permohonan</span>
-                                <p id="cardTanggal" class="font-semibold text-slate-700 text-xs sm:text-sm"></p>
-                            </div>
-                        </div>
-
-                        <!-- Content Details -->
-                        <div class="space-y-2.5 text-xs sm:text-sm relative z-10">
-                            <div class="grid grid-cols-3">
-                                <span class="text-slate-500 font-medium">Pemohon</span>
-                                <span id="cardNama" class="col-span-2 font-bold text-slate-800"></span>
-                            </div>
-                            <div class="grid grid-cols-3">
-                                <span class="text-slate-500 font-medium">No. Telepon</span>
-                                <span id="cardTelepon" class="col-span-2 font-semibold text-slate-700"></span>
-                            </div>
-                            <div class="grid grid-cols-3">
-                                <span class="text-slate-500 font-medium">Keperluan</span>
-                                <span id="cardKeperluan" class="col-span-2 font-bold text-emerald-800"></span>
-                            </div>
-                            <div class="grid grid-cols-3">
-                                <span class="text-slate-500 font-medium">Petugas / Eksekutor</span>
-                                <span id="cardEksekutor" class="col-span-2 font-semibold text-slate-800"></span>
-                            </div>
-                            <div class="grid grid-cols-3 items-center">
-                                <span class="text-slate-500 font-medium">Status Berkas</span>
-                                <div class="col-span-2">
-                                    <span id="cardStatusBadge" class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold"></span>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-3">
-                                <span class="text-slate-500 font-medium">Est. Tanggal Selesai</span>
-                                <span id="cardTanggalSelesai" class="col-span-2 text-slate-700"></span>
-                            </div>
-                            <div class="grid grid-cols-3 border-t border-slate-100 pt-2">
-                                <span class="text-slate-500 font-medium">Keterangan</span>
-                                <span id="cardKeterangan" class="col-span-2 text-slate-600 italic text-xs"></span>
-                            </div>
-                        </div>
-
-                        <!-- Footer Sign & QR Code -->
-                        <div class="mt-5 pt-3 border-t border-slate-200 flex justify-between items-end">
-                            <div class="text-center">
-                                <!-- Dummy QR Code SVG -->
-                                <div id="cardQrCode" class="w-16 h-16 border border-slate-300 p-1 bg-white rounded flex items-center justify-center">
-                                    <i class="fa-solid fa-qrcode text-3xl text-slate-800"></i>
-                                </div>
-                                <span class="text-[8px] text-slate-400 mt-0.5 block">Verifikasi Digital</span>
-                            </div>
-                            <div class="text-right text-[10px] text-slate-600">
-                                <p>Tremas, Pacitan</p>
-                                <p class="font-semibold text-slate-800 mt-4">Petugas PTSP MTs</p>
-                                <p id="cardSignEksekutor" class="font-bold underline text-emerald-900 mt-0.5"></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Bottom Bar -->
-                    <div class="bg-emerald-900 text-white text-[9px] text-center py-1 font-mono tracking-wider">
-                        Simpan kartu ini sebagai bukti pengambilan / verifikasi layanan PTSP
-                    </div>
+    <!-- Modal Form Input/Edit -->
+    <div class="modal fade" id="modalForm" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold" id="modalTitle">Form Input Pelayanan PTSP</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-            </div>
-
-            <!-- Download Button -->
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
-                <button onclick="closeCardModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
-                    Tutup
-                </button>
-                <button onclick="downloadCardAsJPEG()" class="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-download"></i> Unduh Kartu (JPEG)
-                </button>
+                <div class="modal-body">
+                    <form id="formPTSP">
+                        <input type="hidden" id="inputId">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">No Pelayanan</label>
+                                <input type="text" id="noPelayanan" class="form-control" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Tanggal Input</label>
+                                <div class="input-group">
+                                    <input type="date" id="tanggalInput" class="form-control" required>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="setHariIni('tanggalInput')">Hari Ini</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nama Pemohon</label>
+                                <input type="text" id="namaPemohon" class="form-control" required placeholder="Nama Lengkap">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nomor Telepon/WA</label>
+                                <input type="tel" id="noTelepon" class="form-control" placeholder="08xxxxxxxxxx" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Keperluan</label>
+                                <select id="keperluan" class="form-select" required>
+                                    <option value="Surat-Menyurat">Surat-Menyurat</option>
+                                    <option value="Permohonan Mutasi">Permohonan Mutasi</option>
+                                    <option value="Permohonan SKTM">Permohonan SKTM</option>
+                                    <option value="Ijazah">Ijazah</option>
+                                    <option value="Raport">Raport</option>
+                                    <option value="Lain-Lain">Lain-Lain</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Eksekutor</label>
+                                <select id="eksekutor" class="form-select" required>
+                                    <option value="Ust. Aris">Ust. Aris</option>
+                                    <option value="Ust. Akim">Ust. Akim</option>
+                                    <option value="Ust. Hamam">Ust. Hamam</option>
+                                    <option value="Ust. Yafi'">Ust. Yafi'</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Status</label>
+                                <select id="status" class="form-select" required onchange="toggleTanggalSelesai()">
+                                    <option value="Diproses">Diproses</option>
+                                    <option value="Selesai">Selesai</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Tanggal Selesai</label>
+                                <div class="input-group">
+                                    <input type="date" id="tanggalSelesai" class="form-control">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="setHariIni('tanggalSelesai')">Hari Ini</button>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Keterangan</label>
+                                <textarea id="keterangan" class="form-control" rows="2" placeholder="Catatan tambahan..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-green" onclick="simpanData()">Simpan Data</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Modal Cetak Kartu -->
+    <div class="modal fade" id="modalKartu" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Kartu Pelayanan PTSP</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="kartuPelayananPrint">
+                        <div class="kop-surat">
+                            <div class="kop-title-1">Perguruan Islam Pondok Tremas</div>
+                            <div class="kop-title-2">MTS PONDOK TREMAS</div>
+                            <div class="kop-alamat">Jln. Patrem, No. 21, Tremas, Arjosari, Pacitan, Jawa Timur. 63581</div>
+                        </div>
+                        <h6 class="fw-bold mb-3">KARTU BUKTI PELAYANAN</h6>
+                        <table class="table table-borderless text-start table-sm small">
+                            <tr><th>No. Pelayanan</th><td>: <span id="kNo"></span></td></tr>
+                            <tr><th>Tanggal Input</th><td>: <span id="kTgl"></span></td></tr>
+                            <tr><th>Nama Pemohon</th><td>: <span id="kNama"></span></td></tr>
+                            <tr><th>Keperluan</th><td>: <span id="kKeperluan"></span></td></tr>
+                            <tr><th>Petugas (Eksekutor)</th><td>: <span id="kEksekutor"></span></td></tr>
+                            <tr><th>Status</th><td>: <span id="kStatus"></span></td></tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button class="btn btn-success btn-sm" onclick="downloadKartu('jpeg')"><i class="fa-solid fa-file-image me-1"></i>Download JPEG</button>
+                    <button class="btn btn-danger btn-sm" onclick="downloadKartu('pdf')"><i class="fa-solid fa-file-pdf me-1"></i>Download PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- Script JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // STORAGE KEY
-        const STORAGE_KEY = 'PTSP_MTS_TREMAS_DATABASE_V1';
+        let globalData = [];
+        let filteredData = [];
+        let scriptUrl = localStorage.getItem('ptsp_script_url') || '';
 
-        // SAMPLE DATA AWAL RELEVAN MTS PONDOK TREMAS
-        const SAMPLE_DATA = [
-            {
-                id: '1',
-                noPelayanan: 'PTSP-20261020-001',
-                tanggal: '2026-10-20',
-                nama: 'M. Ali Ridho',
-                telepon: '081234567810',
-                keperluan: 'Surat-Menyurat',
-                eksekutor: 'Ust. Aris',
-                status: 'Selesai',
-                tanggalSelesai: '2026-10-20',
-                keterangan: 'Surat Keterangan Aktif Santri kelas IX'
-            },
-            {
-                id: '2',
-                noPelayanan: 'PTSP-20261021-002',
-                tanggal: '2026-10-21',
-                nama: 'Ahmad Muzakki',
-                telepon: '085789123456',
-                keperluan: 'Ijazah',
-                eksekutor: 'Ust. Akim',
-                status: 'Diproses',
-                tanggalSelesai: '2026-10-23',
-                keterangan: 'Pengambilan Legalisir Ijazah MTs Tahun 2024'
-            },
-            {
-                id: '3',
-                noPelayanan: 'PTSP-20261021-003',
-                tanggal: '2026-10-21',
-                nama: 'Siti Nurjanah',
-                telepon: '082198765432',
-                keperluan: 'Permohonan SKTM',
-                eksekutor: 'Ust. Hamam',
-                status: 'Selesai',
-                tanggalSelesai: '2026-10-21',
-                keterangan: 'SKTM untuk kelengkapan beasiswa alumni'
-            },
-            {
-                id: '4',
-                noPelayanan: 'PTSP-20261015-004',
-                tanggal: '2026-10-15',
-                nama: 'Hendra Wijaya',
-                telepon: '081333444555',
-                keperluan: 'Permohonan Mutasi',
-                eksekutor: 'Ust. Yafi\'',
-                status: 'Selesai',
-                tanggalSelesai: '2026-10-17',
-                keterangan: 'Berkas Pindah Sekolah ke MTs Jawa Barat'
-            }
-        ];
-
-        let database = [];
-        let activeCardData = null;
-
-        // INITIALIZATION
-        window.onload = function() {
-            loadDatabase();
-            startLiveClock();
-            document.getElementById('year').innerText = new Date().getFullYear();
-        };
-
-        // LOAD DATA FROM LOCAL STORAGE
-        function loadDatabase() {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                try {
-                    database = JSON.parse(stored);
-                } catch (e) {
-                    database = [...SAMPLE_DATA];
-                }
+        document.addEventListener("DOMContentLoaded", function() {
+            if (scriptUrl) {
+                document.getElementById('scriptUrlInput').value = scriptUrl;
+                document.getElementById('statusKoneksi').innerHTML = '<span class="text-success"><i class="fa-solid fa-circle-check"></i> Terhubung ke Google Sheets</span>';
+                syncData();
             } else {
-                database = [...SAMPLE_DATA];
-                saveDatabase();
+                document.getElementById('statusKoneksi').innerHTML = '<span class="text-danger"><i class="fa-solid fa-circle-exclamation"></i> Belum terhubung. Masukkan URL Apps Script!</span>';
+                document.getElementById('tabelData').innerHTML = '<tr><td colspan="9" class="text-center text-danger py-4">Silakan masukkan URL Apps Script Google Sheets terlebih dahulu!</td></tr>';
             }
-            applyFilters();
-        }
+        });
 
-        // SAVE DATA TO LOCAL STORAGE
-        function saveDatabase() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(database));
-        }
-
-        // REAL-TIME CLOCK
-        function startLiveClock() {
-            function updateClock() {
-                const now = new Date();
-                const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-                document.getElementById('liveClock').innerText = now.toLocaleDateString('id-ID', options);
+        function simpanUrlScript() {
+            let input = document.getElementById('scriptUrlInput').value.trim();
+            if(!input) {
+                alert("URL Apps Script tidak boleh kosong!");
+                return;
             }
-            updateClock();
-            setInterval(updateClock, 1000);
+            localStorage.setItem('ptsp_script_url', input);
+            scriptUrl = input;
+            alert("URL Database berhasil disimpan!");
+            location.reload();
         }
 
-        // AUTO GENERATE NO PELAYANAN
-        function generateNoPelayanan() {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const dateStr = `${yyyy}${mm}${dd}`;
-
-            // Count existing items for today
-            const countToday = database.filter(item => item.noPelayanan.includes(`PTSP-${dateStr}`)).length;
-            const sequence = String(countToday + 1).padStart(3, '0');
-
-            return `PTSP-${dateStr}-${sequence}`;
+        function syncData() {
+            if(!scriptUrl) return;
+            document.getElementById('tabelData').innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Mengambil data dari Google Sheets...</td></tr>';
+            
+            fetch(scriptUrl)
+            .then(res => res.json())
+            .then(data => {
+                globalData = data.reverse();
+                filteredData = [...globalData];
+                renderTabel(filteredData);
+                updateStats();
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('tabelData').innerHTML = '<tr><td colspan="9" class="text-center text-danger py-4">Gagal terhubung ke Google Sheets. Cek kembali URL Apps Script Anda.</td></tr>';
+            });
         }
 
-        // RENDER TABLE & UPDATE STATS
-        function renderTable(dataToRender) {
-            const tbody = document.getElementById('dataTableBody');
-            const emptyState = document.getElementById('emptyState');
+        function renderTabel(data) {
+            let tbody = document.getElementById('tabelData');
             tbody.innerHTML = '';
 
-            if (dataToRender.length === 0) {
-                emptyState.classList.remove('hidden');
-            } else {
-                emptyState.classList.add('hidden');
-                dataToRender.forEach((item, index) => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-emerald-50/40 transition border-b border-slate-200';
-
-                    const isSelesai = item.status === 'Selesai';
-                    const statusBadge = isSelesai 
-                        ? `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs px-2.5 py-0.5 rounded-full font-semibold"><i class="fa-solid fa-check text-[10px] mr-1"></i>Selesai</span>`
-                        : `<span class="bg-amber-100 text-amber-800 border border-amber-300 text-xs px-2.5 py-0.5 rounded-full font-semibold"><i class="fa-solid fa-hourglass-half text-[10px] mr-1"></i>Diproses</span>`;
-
-                    tr.innerHTML = `
-                        <td class="p-3.5 text-center font-medium text-slate-500">${index + 1}</td>
-                        <td class="p-3.5 font-mono font-bold text-emerald-900 whitespace-nowrap">${escapeHTML(item.noPelayanan)}</td>
-                        <td class="p-3.5 whitespace-nowrap text-slate-600">${formatDateID(item.tanggal)}</td>
-                        <td class="p-3.5 font-semibold text-slate-800">${escapeHTML(item.nama)}</td>
-                        <td class="p-3.5 whitespace-nowrap text-slate-600">
-                            <a href="https://wa.me/${cleanPhone(item.telepon)}" target="_blank" class="text-emerald-700 hover:underline flex items-center gap-1">
-                                <i class="fa-brands fa-whatsapp text-emerald-600"></i> ${escapeHTML(item.telepon)}
-                            </a>
-                        </td>
-                        <td class="p-3.5 font-medium text-slate-700">${escapeHTML(item.keperluan)}</td>
-                        <td class="p-3.5 text-slate-700">${escapeHTML(item.eksekutor)}</td>
-                        <td class="p-3.5 text-center">${statusBadge}</td>
-                        <td class="p-3.5 whitespace-nowrap text-slate-600">${item.tanggalSelesai ? formatDateID(item.tanggalSelesai) : '-'}</td>
-                        <td class="p-3.5 text-center">
-                            <div class="flex items-center justify-center space-x-1.5">
-                                <button onclick="openCardModal('${item.id}')" title="Cetak Kartu" class="p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition">
-                                    <i class="fa-solid fa-id-card"></i>
-                                </button>
-                                <button onclick="editData('${item.id}')" title="Edit Data" class="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg transition">
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                                <button onclick="deleteData('${item.id}')" title="Hapus Data" class="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-
-            document.getElementById('showingCount').innerText = `Menampilkan ${dataToRender.length} dari total ${database.length} data`;
-            updateDashboardStats();
-        }
-
-        // UPDATE DASHBOARD STATISTIK
-        function updateDashboardStats() {
-            const total = database.length;
-            const diproses = database.filter(i => i.status === 'Diproses').length;
-            const selesai = database.filter(i => i.status === 'Selesai').length;
-
-            const todayStr = new Date().toISOString().split('T')[0];
-            const hariIni = database.filter(i => i.tanggal === todayStr).length;
-
-            document.getElementById('statTotal').innerText = total;
-            document.getElementById('statDiproses').innerText = diproses;
-            document.getElementById('statSelesai').innerText = selesai;
-            document.getElementById('statHariIni').innerText = hariIni;
-        }
-
-        // APPLY SEARCH AND FILTERS (WAKTU, KEPERLUAN, STATUS)
-        function applyFilters() {
-            const searchKeyword = document.getElementById('searchInput').value.toLowerCase().trim();
-            const filterPeriode = document.getElementById('filterPeriode').value;
-            const filterKeperluan = document.getElementById('filterKeperluan').value;
-            const filterStatus = document.getElementById('filterStatus').value;
-
-            const now = new Date();
-            
-            const filtered = database.filter(item => {
-                // 1. Search Query Match
-                const matchSearch = item.noPelayanan.toLowerCase().includes(searchKeyword) ||
-                                    item.nama.toLowerCase().includes(searchKeyword) ||
-                                    item.telepon.includes(searchKeyword) ||
-                                    item.eksekutor.toLowerCase().includes(searchKeyword);
-
-                // 2. Status Match
-                const matchStatus = (filterStatus === 'semua') || (item.status === filterStatus);
-
-                // 3. Keperluan Match
-                const matchKeperluan = (filterKeperluan === 'semua') || (item.keperluan === filterKeperluan);
-
-                // 4. Periode Waktu Match
-                let matchPeriode = true;
-                if (item.tanggal) {
-                    const itemDate = new Date(item.tanggal);
-                    
-                    if (filterPeriode === 'minggu_ini') {
-                        // Calculate start of current week (Monday)
-                        const startOfWeek = new Date(now);
-                        const day = now.getDay() || 7; 
-                        if (day !== 1) startOfWeek.setHours(-24 * (day - 1));
-                        startOfWeek.setHours(0,0,0,0);
-                        matchPeriode = itemDate >= startOfWeek;
-                    } else if (filterPeriode === 'bulan_ini') {
-                        matchPeriode = itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
-                    } else if (filterPeriode === 'tahun_ini') {
-                        matchPeriode = itemDate.getFullYear() === now.getFullYear();
-                    }
-                }
-
-                return matchSearch && matchStatus && matchKeperluan && matchPeriode;
-            });
-
-            renderTable(filtered);
-        }
-
-        // RESET FILTERS
-        function resetFilters() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('filterPeriode').value = 'semua';
-            document.getElementById('filterKeperluan').value = 'semua';
-            document.getElementById('filterStatus').value = 'semua';
-            applyFilters();
-        }
-
-        // OPEN MODAL FOR NEW ENTRY
-        function openFormModal() {
-            document.getElementById('pelayananForm').reset();
-            document.getElementById('editId').value = '';
-            document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-plus-circle text-amber-400"></i> Entry Data Pelayanan Baru`;
-            
-            // Set defaults
-            const todayStr = new Date().toISOString().split('T')[0];
-            document.getElementById('inputTanggal').value = todayStr;
-            document.getElementById('inputNoPelayanan').value = generateNoPelayanan();
-            document.getElementById('inputStatus').value = 'Diproses';
-            document.getElementById('inputTanggalSelesai').value = '';
-            
-            toggleTanggalSelesaiLogic();
-
-            document.getElementById('formModal').classList.remove('hidden');
-        }
-
-        // CLOSE FORM MODAL
-        function closeFormModal() {
-            document.getElementById('formModal').classList.add('hidden');
-        }
-
-        // TOGGLE TANGGAL SELESAI LOGIC
-        function toggleTanggalSelesaiLogic() {
-            const status = document.getElementById('inputStatus').value;
-            const tglSelesaiInput = document.getElementById('inputTanggalSelesai');
-
-            if (status === 'Selesai') {
-                if (!tglSelesaiInput.value) {
-                    tglSelesaiInput.value = new Date().toISOString().split('T')[0];
-                }
-            }
-        }
-
-        // HANDLE FORM SUBMIT (SAVE / UPDATE)
-        function handleFormSubmit(e) {
-            e.preventDefault();
-
-            const editId = document.getElementById('editId').value;
-            const noPelayanan = document.getElementById('inputNoPelayanan').value;
-            const tanggal = document.getElementById('inputTanggal').value;
-            const nama = document.getElementById('inputNama').value.trim();
-            const telepon = document.getElementById('inputTelepon').value.trim();
-            const keperluan = document.getElementById('inputKeperluan').value;
-            const eksekutor = document.getElementById('inputEksekutor').value;
-            const status = document.getElementById('inputStatus').value;
-            const tanggalSelesai = document.getElementById('inputTanggalSelesai').value;
-            const keterangan = document.getElementById('inputKeterangan').value.trim();
-
-            if (editId) {
-                // Update Existing Item
-                const index = database.findIndex(i => i.id === editId);
-                if (index !== -1) {
-                    database[index] = {
-                        ...database[index],
-                        tanggal,
-                        nama,
-                        telepon,
-                        keperluan,
-                        eksekutor,
-                        status,
-                        tanggalSelesai: status === 'Selesai' ? (tanggalSelesai || new Date().toISOString().split('T')[0]) : '',
-                        keterangan
-                    };
-                }
-            } else {
-                // Add New Item
-                const newItem = {
-                    id: Date.now().toString(),
-                    noPelayanan,
-                    tanggal,
-                    nama,
-                    telepon,
-                    keperluan,
-                    eksekutor,
-                    status,
-                    tanggalSelesai: status === 'Selesai' ? (tanggalSelesai || new Date().toISOString().split('T')[0]) : '',
-                    keterangan
-                };
-                database.unshift(newItem);
-            }
-
-            saveDatabase();
-            applyFilters();
-            closeFormModal();
-        }
-
-        // EDIT DATA
-        function editData(id) {
-            const item = database.find(i => i.id === id);
-            if (!item) return;
-
-            document.getElementById('editId').value = item.id;
-            document.getElementById('inputNoPelayanan').value = item.noPelayanan;
-            document.getElementById('inputTanggal').value = item.tanggal;
-            document.getElementById('inputNama').value = item.nama;
-            document.getElementById('inputTelepon').value = item.telepon;
-            document.getElementById('inputKeperluan').value = item.keperluan;
-            document.getElementById('inputEksekutor').value = item.eksekutor;
-            document.getElementById('inputStatus').value = item.status;
-            document.getElementById('inputTanggalSelesai').value = item.tanggalSelesai || '';
-            document.getElementById('inputKeterangan').value = item.keterangan || '';
-
-            document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-amber-400"></i> Edit Data Pelayanan (${item.noPelayanan})`;
-            document.getElementById('formModal').classList.remove('hidden');
-        }
-
-        // DELETE DATA
-        function deleteData(id) {
-            const item = database.find(i => i.id === id);
-            if (!item) return;
-
-            if (confirm(`Apakah Anda yakin ingin menghapus data pelayanan "${item.noPelayanan}" atas nama ${item.nama}?`)) {
-                database = database.filter(i => i.id !== id);
-                saveDatabase();
-                applyFilters();
-            }
-        }
-
-        // OPEN CARD PREVIEW MODAL
-        function openCardModal(id) {
-            const item = database.find(i => i.id === id);
-            if (!item) return;
-
-            activeCardData = item;
-
-            document.getElementById('cardNoPelayanan').innerText = item.noPelayanan;
-            document.getElementById('cardTanggal').innerText = formatDateID(item.tanggal);
-            document.getElementById('cardNama').innerText = item.nama;
-            document.getElementById('cardTelepon').innerText = item.telepon;
-            document.getElementById('cardKeperluan').innerText = item.keperluan;
-            document.getElementById('cardEksekutor').innerText = item.eksekutor;
-            document.getElementById('cardSignEksekutor').innerText = item.eksekutor;
-            document.getElementById('cardTanggalSelesai').innerText = item.tanggalSelesai ? formatDateID(item.tanggalSelesai) : 'Dalam Proses';
-            document.getElementById('cardKeterangan').innerText = item.keterangan || '-';
-
-            const statusBadge = document.getElementById('cardStatusBadge');
-            if (item.status === 'Selesai') {
-                statusBadge.className = 'inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
-                statusBadge.innerText = 'SELESAI';
-            } else {
-                statusBadge.className = 'inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300';
-                statusBadge.innerText = 'DIPROSES';
-            }
-
-            document.getElementById('cardModal').classList.remove('hidden');
-        }
-
-        // CLOSE CARD MODAL
-        function closeCardModal() {
-            document.getElementById('cardModal').classList.add('hidden');
-        }
-
-        // DOWNLOAD CARD AS JPEG
-        function downloadCardAsJPEG() {
-            const cardElement = document.getElementById('kartuPelayananPrint');
-            if (!cardElement || !activeCardData) return;
-
-            // Use html2canvas for high resolution download
-            html2canvas(cardElement, {
-                scale: 3, // Higher scale for clear text
-                useCORS: true,
-                backgroundColor: '#ffffff'
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `Kartu-Pelayanan-${activeCardData.noPelayanan}.jpeg`;
-                link.href = canvas.toDataURL('image/jpeg', 0.95);
-                link.click();
-            }).catch(err => {
-                console.error("Gagal mengunduh kartu:", err);
-                alert("Terjadi kesalahan saat mengunduh gambar kartu.");
-            });
-        }
-
-        // EXPORT CURRENT FILTERED DATA TO EXCEL
-        function exportToExcel() {
-            if (database.length === 0) {
-                alert("Tidak ada data untuk diekspor!");
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">Belum ada data pelayanan.</td></tr>';
                 return;
             }
 
-            // Get current displayed/filtered data
-            const searchKeyword = document.getElementById('searchInput').value.toLowerCase().trim();
-            const filterPeriode = document.getElementById('filterPeriode').value;
-            const filterKeperluan = document.getElementById('filterKeperluan').value;
-            const filterStatus = document.getElementById('filterStatus').value;
+            data.forEach((item, index) => {
+                let statusBadge = item.status === 'Selesai' 
+                    ? '<span class="badge badge-selesai">Selesai</span>' 
+                    : '<span class="badge badge-diproses">Diproses</span>';
 
-            const now = new Date();
-
-            const filtered = database.filter(item => {
-                const matchSearch = item.noPelayanan.toLowerCase().includes(searchKeyword) ||
-                                    item.nama.toLowerCase().includes(searchKeyword) ||
-                                    item.telepon.includes(searchKeyword) ||
-                                    item.eksekutor.toLowerCase().includes(searchKeyword);
-                const matchStatus = (filterStatus === 'semua') || (item.status === filterStatus);
-                const matchKeperluan = (filterKeperluan === 'semua') || (item.keperluan === filterKeperluan);
-
-                let matchPeriode = true;
-                if (item.tanggal) {
-                    const itemDate = new Date(item.tanggal);
-                    if (filterPeriode === 'minggu_ini') {
-                        const startOfWeek = new Date(now);
-                        const day = now.getDay() || 7;
-                        if (day !== 1) startOfWeek.setHours(-24 * (day - 1));
-                        startOfWeek.setHours(0,0,0,0);
-                        matchPeriode = itemDate >= startOfWeek;
-                    } else if (filterPeriode === 'bulan_ini') {
-                        matchPeriode = itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
-                    } else if (filterPeriode === 'tahun_ini') {
-                        matchPeriode = itemDate.getFullYear() === now.getFullYear();
-                    }
-                }
-                return matchSearch && matchStatus && matchKeperluan && matchPeriode;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${item.noPelayanan}</strong></td>
+                        <td>${item.tanggalInput}</td>
+                        <td>${item.namaPemohon}</td>
+                        <td>${item.noTelepon}</td>
+                        <td>${item.keperluan}</td>
+                        <td>${item.eksekutor}</td>
+                        <td>${statusBadge}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-info text-white me-1" onclick="previewKartu('${item.id}')" title="Cetak Kartu"><i class="fa-solid fa-id-card"></i></button>
+                            <button class="btn btn-sm btn-warning text-white me-1" onclick="editData('${item.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="hapusData('${item.id}')" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
             });
-
-            // Map data for sheet format
-            const exportData = filtered.map((item, index) => ({
-                "No": index + 1,
-                "No Pelayanan": item.noPelayanan,
-                "Tanggal Permohonan": item.tanggal,
-                "Nama Pemohon": item.nama,
-                "No. WhatsApp": item.telepon,
-                "Keperluan": item.keperluan,
-                "Eksekutor": item.eksekutor,
-                "Status": item.status,
-                "Tanggal Selesai": item.tanggalSelesai || '-',
-                "Keterangan": item.keterangan || '-'
-            }));
-
-            // Create Worksheet
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Pelayanan PTSP");
-
-            // Adjust Column Widths
-            const max_width = exportData.reduce((w, r) => Math.max(w, r["Nama Pemohon"].length), 10);
-            worksheet["!cols"] = [
-                { wch: 5 },  // No
-                { wch: 22 }, // No Pelayanan
-                { wch: 18 }, // Tanggal
-                { wch: Math.max(max_width, 25) }, // Nama
-                { wch: 16 }, // Telepon
-                { wch: 20 }, // Keperluan
-                { wch: 16 }, // Eksekutor
-                { wch: 12 }, // Status
-                { wch: 16 }, // Tgl Selesai
-                { wch: 30 }  // Keterangan
-            ];
-
-            // Generate Filename
-            const dateStr = new Date().toISOString().split('T')[0];
-            XLSX.writeFile(workbook, `Rekap_PTSP_MTs_Tremas_${dateStr}.xlsx`);
         }
 
-        // HELPER FUNCTIONS
-        function formatDateID(dateString) {
-            if (!dateString) return '-';
-            const parts = dateString.split('-');
-            if (parts.length === 3) {
-                return `${parts[2]}/${parts[1]}/${parts[0]}`;
-            }
-            return dateString;
-        }
-
-        function cleanPhone(phone) {
-            if (!phone) return '';
-            let cleaned = phone.replace(/[^0-9]/g, '');
-            if (cleaned.startsWith('0')) {
-                cleaned = '62' + cleaned.slice(1);
-            }
-            return cleaned;
-        }
-
-        function escapeHTML(str) {
-            if (!str) return '';
-            return str.replace(/[&<>'"]/g, 
-                tag => ({
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    "'": '&#39;',
-                    '"': '&quot;'
-                }[tag] || tag)
-            );
-        }
-    </script>
-</body>
-</html>
+        function updateStats() {
+            document.getElementById('statTotal').innerText = globalData.length;
+            document.getElementById('statProses').innerText = globalData.filter(d => d.status === 'Diproses').length;
+            document.getElementById('statSelesai').innerText = globalData.filter(d => d.status === 'Se
