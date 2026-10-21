@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- html2canvas & jspdf for Export Card -->
+    <!-- html2canvas & jspdf -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- SheetJS for Export Excel -->
@@ -48,16 +48,12 @@
         }
         .badge-diproses { background-color: #ffeaa7; color: #d63031; border: 1px solid #fdcb6e; }
         .badge-selesai { background-color: #2ed573; color: white; }
-        .stat-card {
-            border-left: 5px solid var(--primary-green);
-        }
-        /* Style Kartu Pelayanan untuk Download */
+        .stat-card { border-left: 5px solid var(--primary-green); }
         #kartuPelayananPrint {
-            width: 500px;
+            width: 480px;
             padding: 25px;
             background: #fff;
             border: 3px double var(--primary-green);
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
             margin: auto;
         }
         .kop-surat {
@@ -66,9 +62,9 @@
             margin-bottom: 15px;
             text-align: center;
         }
-        .kop-title-1 { font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0; }
-        .kop-title-2 { font-size: 18px; font-weight: 800; color: var(--primary-green); margin: 0; }
-        .kop-alamat { font-size: 11px; margin: 0; color: #555; }
+        .kop-title-1 { font-size: 13px; font-weight: bold; text-transform: uppercase; margin: 0; }
+        .kop-title-2 { font-size: 17px; font-weight: 800; color: var(--primary-green); margin: 0; }
+        .kop-alamat { font-size: 10px; margin: 0; color: #555; }
     </style>
 </head>
 <body>
@@ -77,14 +73,14 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
-                <i class="fa-solid me-3 fs-3 text-warning"></i>
+                <i class="fa-solid fa-kaaba me-3 fs-3 text-warning"></i>
                 <div>
                     <h5 class="m-0 fw-bold">PTSP MTs PONDOK TREMAS</h5>
-                    <small class="text-white-50" style="font-size: 12px;">Pelayanan Terpadu Satu Pintu - Sync Google Sheets</small>
+                    <small class="text-white-50" style="font-size: 12px;">Pelayanan Terpadu Satu Pintu - Google Sheets Database</small>
                 </div>
             </a>
             <button class="btn btn-outline-light btn-sm" onclick="syncData()">
-                <i class="fa-solid fa-rotate me-1"></i> Refresh Data
+                <i class="fa-solid fa-rotate me-1"></i> Muat Ulang Data
             </button>
         </div>
     </nav>
@@ -98,9 +94,10 @@
                     <strong class="text-dark"><i class="fa-solid fa-link text-warning me-2"></i>Koneksi Database Google Sheets:</strong>
                     <div class="small text-muted" id="statusKoneksi">Status: Memeriksa koneksi...</div>
                 </div>
-                <div class="d-flex gap-2">
-                    <input type="text" id="scriptUrlInput" class="form-control form-control-sm" style="width: 300px;" placeholder="Tempel URL Google Apps Script di sini...">
-                    <button class="btn btn-warning btn-sm fw-bold" onclick="simpanUrlScript()">Hubungkan</button>
+                <div class="d-flex gap-2 flex-wrap">
+                    <input type="text" id="scriptUrlInput" class="form-control form-control-sm" style="width: 280px;" placeholder="Tempel URL Web App Apps Script di sini...">
+                    <button type="button" class="btn btn-warning btn-sm fw-bold" onclick="simpanUrlScript()">Hubungkan</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="resetUrlScript()"><i class="fa-solid fa-trash"></i></button>
                 </div>
             </div>
         </div>
@@ -136,7 +133,7 @@
         <!-- Tab & Akses Fitur -->
         <div class="card card-custom p-3 mb-4">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <button class="btn btn-green fw-semibold" data-bs-toggle="modal" data-bs-target="#modalForm" onclick="resetForm()">
+                <button class="btn btn-green fw-semibold" onclick="bukaModalForm()">
                     <i class="fa-solid fa-plus me-2"></i>Tambah Pelayanan Baru
                 </button>
                 <div class="d-flex gap-2 flex-wrap">
@@ -170,7 +167,7 @@
                     </thead>
                     <tbody id="tabelData">
                         <tr>
-                            <td colspan="9" class="text-center py-4 text-muted">Sedang memuat data dari Google Sheets...</td>
+                            <td colspan="9" class="text-center py-4 text-muted">Memuat data dari database...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -253,7 +250,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-green" onclick="simpanData()">Simpan Data</button>
+                    <button type="button" class="btn btn-green" id="btnSimpan" onclick="simpanData()">Simpan Data</button>
                 </div>
             </div>
         </div>
@@ -299,45 +296,59 @@
         let globalData = [];
         let filteredData = [];
         let scriptUrl = localStorage.getItem('ptsp_script_url') || '';
+        let modalFormObj = null;
 
         document.addEventListener("DOMContentLoaded", function() {
+            modalFormObj = new bootstrap.Modal(document.getElementById('modalForm'));
+
             if (scriptUrl) {
                 document.getElementById('scriptUrlInput').value = scriptUrl;
-                document.getElementById('statusKoneksi').innerHTML = '<span class="text-success"><i class="fa-solid fa-circle-check"></i> Terhubung ke Google Sheets</span>';
+                document.getElementById('statusKoneksi').innerHTML = '<span class="text-success fw-bold"><i class="fa-solid fa-circle-check"></i> Terhubung ke Database</span>';
                 syncData();
             } else {
-                document.getElementById('statusKoneksi').innerHTML = '<span class="text-danger"><i class="fa-solid fa-circle-exclamation"></i> Belum terhubung. Masukkan URL Apps Script!</span>';
-                document.getElementById('tabelData').innerHTML = '<tr><td colspan="9" class="text-center text-danger py-4">Silakan masukkan URL Apps Script Google Sheets terlebih dahulu!</td></tr>';
+                document.getElementById('statusKoneksi').innerHTML = '<span class="text-danger fw-bold"><i class="fa-solid fa-circle-exclamation"></i> Belum Terhubung</span>';
+                document.getElementById('tabelData').innerHTML = '<tr><td colspan="9" class="text-center text-danger py-4">Silakan tempel URL Google Apps Script pada kolom di atas lalu klik Hubungkan.</td></tr>';
             }
         });
 
         function simpanUrlScript() {
             let input = document.getElementById('scriptUrlInput').value.trim();
-            if(!input) {
-                alert("URL Apps Script tidak boleh kosong!");
+            if (!input) {
+                alert("Silakan masukkan URL Apps Script Google Sheets terlebih dahulu!");
+                return;
+            }
+            if (!input.includes('script.google.com') || !input.includes('/exec')) {
+                alert("Format URL tidak valid! Pastikan URL berakhiran /exec");
                 return;
             }
             localStorage.setItem('ptsp_script_url', input);
             scriptUrl = input;
-            alert("URL Database berhasil disimpan!");
+            alert("Koneksi berhasil disimpan!");
             location.reload();
         }
 
+        function resetUrlScript() {
+            if (confirm("Hapus tautan koneksi Google Sheets?")) {
+                localStorage.removeItem('ptsp_script_url');
+                location.reload();
+            }
+        }
+
         function syncData() {
-            if(!scriptUrl) return;
-            document.getElementById('tabelData').innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Mengambil data dari Google Sheets...</td></tr>';
+            if (!scriptUrl) return;
+            document.getElementById('tabelData').innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Mengambil data...</td></tr>';
             
             fetch(scriptUrl)
             .then(res => res.json())
             .then(data => {
-                globalData = data.reverse();
+                globalData = Array.isArray(data) ? data.reverse() : [];
                 filteredData = [...globalData];
                 renderTabel(filteredData);
                 updateStats();
             })
             .catch(err => {
                 console.error(err);
-                document.getElementById('tabelData').innerHTML = '<tr><td colspan="9" class="text-center text-danger py-4">Gagal terhubung ke Google Sheets. Cek kembali URL Apps Script Anda.</td></tr>';
+                document.getElementById('tabelData').innerHTML = '<tr><td colspan="9" class="text-center text-danger py-4">Gagal terhubung ke Google Sheets. Pastikan akses deployment diset ke "Anyone" (Siapa Saja).</td></tr>';
             });
         }
 
@@ -345,7 +356,7 @@
             let tbody = document.getElementById('tabelData');
             tbody.innerHTML = '';
 
-            if (data.length === 0) {
+            if (!data || data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">Belum ada data pelayanan.</td></tr>';
                 return;
             }
@@ -358,24 +369,13 @@
                 tbody.innerHTML += `
                     <tr>
                         <td>${index + 1}</td>
-                        <td><strong>${item.noPelayanan}</strong></td>
-                        <td>${item.tanggalInput}</td>
-                        <td>${item.namaPemohon}</td>
-                        <td>${item.noTelepon}</td>
-                        <td>${item.keperluan}</td>
-                        <td>${item.eksekutor}</td>
+                        <td><strong>${item.noPelayanan || '-'}</strong></td>
+                        <td>${item.tanggalInput || '-'}</td>
+                        <td>${item.namaPemohon || '-'}</td>
+                        <td>${item.noTelepon || '-'}</td>
+                        <td>${item.keperluan || '-'}</td>
+                        <td>${item.eksekutor || '-'}</td>
                         <td>${statusBadge}</td>
                         <td class="text-center">
                             <button class="btn btn-sm btn-info text-white me-1" onclick="previewKartu('${item.id}')" title="Cetak Kartu"><i class="fa-solid fa-id-card"></i></button>
-                            <button class="btn btn-sm btn-warning text-white me-1" onclick="editData('${item.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn btn-sm btn-danger" onclick="hapusData('${item.id}')" title="Hapus"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function updateStats() {
-            document.getElementById('statTotal').innerText = globalData.length;
-            document.getElementById('statProses').innerText = globalData.filter(d => d.status === 'Diproses').length;
-            document.getElementById('statSelesai').innerText = globalData.filter(d => d.status === 'Se
+                            <button class="btn btn-sm btn-warning text-white me-1" onclick="editData('
